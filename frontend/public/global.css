@@ -1,0 +1,9 @@
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+/* the setting to remove position fixed doesnt seem to work */
+.mdc-top-app-bar {
+    position: static !important;
+}
