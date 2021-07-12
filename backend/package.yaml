@@ -27,9 +27,12 @@ executables:
 
 dependencies:
   - base
+  - http-types
   - servant
   - servant-server
   - transformers
   - aeson
   - wai
+  - wai-cors
+  - wai-extra
   - warp

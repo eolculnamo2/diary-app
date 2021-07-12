@@ -1,4 +1,4 @@
-module Constants.Auth exposing (..)
+module Constants.Api exposing (..)
 
 
 api : String

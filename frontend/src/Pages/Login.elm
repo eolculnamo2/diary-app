@@ -3,6 +3,7 @@ module Pages.Login exposing (Model, Msg, page)
 import Components.Header as Header
 import Constants.Api exposing (api)
 import Gen.Params.Login exposing (Params)
+import Gen.Route exposing (Route(..))
 import Html exposing (..)
 import Html.Attributes exposing (href, style)
 import Http
@@ -12,7 +13,7 @@ import Layouts.DashboardBody exposing (dashboardBody)
 import Material.Button as Button
 import Material.TextField as TextField
 import Page
-import Request
+import Request exposing (..)
 import Shared
 import Url exposing (Protocol(..))
 import View exposing (View)
@@ -22,7 +23,7 @@ page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
     Page.element
         { init = init
-        , update = update
+        , update = update req
         , view = view
         , subscriptions = subscriptions
         }
@@ -35,12 +36,13 @@ page shared req =
 type alias Model =
     { username : String
     , password : String
+    , errorMessage : Maybe String
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { username = "", password = "" }, Cmd.none )
+    ( { username = "", password = "", errorMessage = Nothing }, Cmd.none )
 
 
 
@@ -54,8 +56,8 @@ type Msg
     | LoginRequested (Result Http.Error String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Request -> Msg -> Model -> ( Model, Cmd Msg )
+update req msg model =
     case msg of
         UsernameUpdated usernameUpdate ->
             ( { model | username = usernameUpdate }, Cmd.none )
@@ -64,15 +66,15 @@ update msg model =
             ( { model | password = passwordUpdate }, Cmd.none )
 
         ClickedLogin ->
-            ( model, Cmd.none )
+            ( model, login { username = model.username, password = model.password } )
 
         LoginRequested result ->
             case result of
                 Ok _ ->
-                    ( model, Cmd.none )
+                    ( model, Request.pushRoute Gen.Route.Dashboard req )
 
                 Err _ ->
-                    ( model, Cmd.none )
+                    ( { model | errorMessage = Just "Something went wrong; Please try again" }, Cmd.none )
 
 
 
@@ -145,6 +147,12 @@ view model =
                     , Button.text
                         (Button.config |> Button.setOnClick ClickedLogin |> Button.setAttributes [ style "float" "right" ])
                         "Login"
+                    , case model.errorMessage of
+                        Nothing ->
+                            div [] []
+
+                        Just msg ->
+                            div [ style "color" "red" ] [ text msg ]
                     ]
                 ]
             )
